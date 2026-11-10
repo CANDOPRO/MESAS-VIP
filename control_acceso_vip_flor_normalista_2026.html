@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Control de Acceso VIP | Flor Normalista 2026</title>
+<style>
+:root{--navy:#101b35;--navy2:#19294b;--gold:#c9a65b;--gold2:#ead7a5;--paper:#f5f6f8;--ink:#1d2638;--muted:#697386;--green:#16845b;--red:#b83d4b;--line:#e4e7ed;--white:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);font-family:Inter,Segoe UI,Arial,sans-serif;color:var(--ink)}
+header{background:linear-gradient(115deg,var(--navy),#25385f);color:white;padding:24px clamp(16px,4vw,48px);border-bottom:4px solid var(--gold)}
+.head{max-width:1200px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.kicker{color:var(--gold2);letter-spacing:.18em;text-transform:uppercase;font-size:11px;font-weight:700}
+h1{margin:6px 0 3px;font-size:clamp(22px,4vw,32px);letter-spacing:.02em}.sub{color:#d6dceb;font-size:13px}
+.pill{border:1px solid #71809c;border-radius:999px;padding:9px 13px;font-size:12px;color:#f1e4c4}
+main{max-width:1200px;margin:24px auto;padding:0 16px 40px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.stat,.panel{background:var(--white);border:1px solid var(--line);border-radius:14px;box-shadow:0 4px 16px #17213b0a}
+.stat{padding:16px}.stat small{display:block;color:var(--muted);font-size:11px;font-weight:700;letter-spacing:.08em}.stat strong{display:block;font-size:28px;margin-top:7px;color:var(--navy)}
+.layout{display:grid;grid-template-columns: minmax(280px,.85fr) minmax(0,1.6fr);gap:16px;align-items:start}
+.panel{padding:18px}.panel h2{font-size:17px;margin:0 0 15px;color:var(--navy)}
+label{display:block;font-size:12px;font-weight:700;color:#475166;margin:12px 0 6px}
+input,select{width:100%;border:1px solid #d7dce5;border-radius:9px;padding:11px 12px;font:inherit;font-size:14px;background:white;color:var(--ink);outline:none}
+input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px #c9a65b24}
+button{border:0;border-radius:9px;padding:10px 13px;font-weight:700;cursor:pointer;font-size:13px}
+.primary{background:var(--navy);color:white;width:100%;margin-top:16px;padding:12px}.primary:hover{background:var(--navy2)}
+.secondary{background:#f0eadc;color:#654c1b}.ghost{background:#eef1f5;color:#39445a}.danger{background:#fae9eb;color:var(--red)}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.toolbar input{flex:1;min-width:160px}
+.tablewrap{overflow:auto}table{border-collapse:collapse;width:100%;min-width:620px}th{text-align:left;color:#687286;font-size:10px;letter-spacing:.08em;text-transform:uppercase;background:#f8f9fb;padding:11px 9px}td{padding:11px 9px;border-top:1px solid var(--line);font-size:13px;vertical-align:middle}
+.name{font-weight:700;color:var(--navy)}.folio{font-variant-numeric:tabular-nums;color:#586276}
+.status{display:inline-block;padding:5px 8px;border-radius:99px;font-size:10px;font-weight:800;letter-spacing:.04em}.inside{background:#e3f4ed;color:#13734f}.pending{background:#fff2d8;color:#8a6215}
+.actions{display:flex;gap:5px;flex-wrap:wrap}.actions button{padding:7px 8px;font-size:11px}
+.mesas{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:9px;margin-top:12px}
+.mesa{border:1px solid var(--line);border-radius:11px;padding:12px;background:#fff}.mesa b{color:var(--navy)}.track{height:6px;background:#edf0f4;border-radius:9px;margin:9px 0 5px;overflow:hidden}.track span{display:block;height:100%;background:var(--gold);border-radius:9px}
+.muted{color:var(--muted);font-size:12px}.empty{text-align:center;padding:30px;color:var(--muted)}
+.notice{font-size:11px;color:var(--muted);line-height:1.5;margin-top:12px}
+.modalback{position:fixed;inset:0;background:#0c1429a8;display:none;align-items:center;justify-content:center;padding:16px;z-index:5}.modal{background:white;border-radius:14px;padding:20px;width:min(420px,100%)}.modal h3{margin:0 0 12px;color:var(--navy)}.modalfoot{display:flex;gap:8px;margin-top:16px}.modalfoot button{flex:1}
+footer{text-align:center;color:#8a92a2;font-size:11px;padding:18px}
+@media(max-width:800px){.stats{grid-template-columns:repeat(2,1fr)}.layout{grid-template-columns:1fr}}
+@media print{header{background:#fff;color:#111;border-bottom:2px solid #999}.kicker,.sub,.pill,.formpanel,.toolbar,.actions,footer,.mesaPanel{display:none!important}main{margin:0;max-width:none}.layout{display:block}.panel,.stat{box-shadow:none}.stats{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+<header><div class="head"><div><div class="kicker">Escuela Normal Urbana de Balancán</div><h1>Control de Acceso VIP</h1><div class="sub">Flor Normalista 2026 · Registro y asignación de mesas</div></div><div class="pill">10 lugares por mesa</div></div></header>
+<main>
+<section class="stats">
+ <div class="stat"><small>INVITADOS REGISTRADOS</small><strong id="total">0</strong></div>
+ <div class="stat"><small>YA INGRESARON</small><strong id="inside">0</strong></div>
+ <div class="stat"><small>PENDIENTES</small><strong id="pending">0</strong></div>
+ <div class="stat"><small>MESAS UTILIZADAS</small><strong id="tableCount">0</strong></div>
+</section>
+<div class="layout">
+ <section class="panel formpanel">
+  <h2 id="formTitle">Registrar invitado VIP</h2>
+  <form id="guestForm">
+   <input type="hidden" id="editId">
+   <label for="guestName">Nombre completo</label><input id="guestName" required maxlength="100" placeholder="Nombre y apellidos">
+   <label for="folio">Folio del identificador VIP</label><input id="folio" required maxlength="40" placeholder="Ej. VIP-001">
+   <label for="tableSelect">Mesa asignada</label><select id="tableSelect" required></select>
+   <div class="notice">Cada mesa admite hasta 10 personas. Puedes elegir cualquier mesa con lugares disponibles. El sistema no permitirá exceder su capacidad.</div>
+   <button class="primary" type="submit" id="saveBtn">Guardar invitado</button>
+   <button class="ghost" type="button" id="cancelEdit" style="display:none;width:100%;margin-top:8px">Cancelar edición</button>
+  </form>
+  <div class="notice">Los datos se guardan automáticamente en este navegador y en esta computadora. No borres los datos del navegador si necesitas conservar el registro.</div>
+ </section>
+ <section class="panel">
+  <h2>Lista de invitados</h2>
+  <div class="toolbar"><input id="search" placeholder="Buscar por nombre o folio..."><select id="filter" style="max-width:165px"><option value="all">Todos</option><option value="pending">Pendientes</option><option value="inside">Ya ingresaron</option></select><button class="secondary" id="exportCsv">Exportar CSV</button><button class="ghost" onclick="window.print()">Imprimir</button></div>
+  <div class="tablewrap"><table><thead><tr><th>Invitado</th><th>Folio</th><th>Mesa</th><th>Acceso</th><th>Acciones</th></tr></thead><tbody id="guestRows"></tbody></table><div class="empty" id="empty">Todavía no hay invitados registrados.</div></div>
+ </section>
+</div>
+<section class="panel mesaPanel" style="margin-top:16px">
+ <h2>Ocupación de mesas</h2><div class="muted">Consulta los lugares ocupados y disponibles en cada mesa.</div><div class="mesas" id="mesaCards"></div>
+</section>
+<footer>Control VIP · Flor Normalista 2026</footer>
+</main>
+<div class="modalback" id="modal"><div class="modal"><h3>Eliminar invitado</h3><p>¿Seguro que deseas eliminar este registro? Esta acción no se puede deshacer.</p><div class="modalfoot"><button class="ghost" id="noDelete">Cancelar</button><button class="danger" id="yesDelete">Eliminar</button></div></div></div>
+<script>
+const KEY='flor_normalista_vip_guests_v1';
+let guests=load(), deleteTarget=null;
+function load(){try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){return []}}
+function persist(){localStorage.setItem(KEY,JSON.stringify(guests));render()}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function used(table,exclude=null){return guests.filter(g=>g.table===table&&g.id!==exclude).length}
+function maxTable(){return guests.reduce((m,g)=>Math.max(m,g.table),0)}
+function populateTables(selected=null,exclude=null){
+ const sel=document.getElementById('tableSelect');sel.innerHTML='';
+ let max=Math.max(1,maxTable()+1);
+ for(let n=1;n<=max;n++){let count=used(n,exclude);let opt=document.createElement('option');opt.value=n;opt.textContent=`Mesa ${n} · ${count}/10 lugares`;opt.disabled=count>=10;sel.appendChild(opt)}
+ if(selected && [...sel.options].some(o=>Number(o.value)===selected&&!o.disabled))sel.value=selected;
+ else {let first=[...sel.options].find(o=>!o.disabled);if(first)sel.value=first.value}
+}
+function render(){
+ const total=guests.length,inside=guests.filter(g=>g.inside).length, tables=[...new Set(guests.map(g=>g.table))];
+ document.getElementById('total').textContent=total;document.getElementById('inside').textContent=inside;document.getElementById('pending').textContent=total-inside;document.getElementById('tableCount').textContent=tables.length;
+ const q=document.getElementById('search').value.toLowerCase(),filter=document.getElementById('filter').value;
+ const rows=guests.filter(g=>(g.name.toLowerCase().includes(q)||g.folio.toLowerCase().includes(q))&&(filter==='all'||(filter==='inside'?g.inside:!g.inside))).sort((a,b)=>a.table-b.table||a.name.localeCompare(b.name,'es'));
+ document.getElementById('guestRows').innerHTML=rows.map(g=>`<tr><td class="name">${esc(g.name)}</td><td class="folio">${esc(g.folio)}</td><td><b>Mesa ${g.table}</b></td><td><span class="status ${g.inside?'inside':'pending'}">${g.inside?'DENTRO':'PENDIENTE'}</span></td><td><div class="actions"><button class="${g.inside?'ghost':'secondary'}" onclick="toggleInside('${g.id}')">${g.inside?'Deshacer':'Marcar ingreso'}</button><button class="ghost" onclick="editGuest('${g.id}')">Editar</button><button class="danger" onclick="askDelete('${g.id}')">Eliminar</button></div></td></tr>`).join('');
+ document.getElementById('empty').style.display=rows.length?'none':'block';
+ const cards=document.getElementById('mesaCards');cards.innerHTML=tables.sort((a,b)=>a-b).map(n=>{let count=used(n),inCount=guests.filter(g=>g.table===n&&g.inside).length;return `<div class="mesa"><b>Mesa ${n}</b><div class="muted">${count} ocupados · ${10-count} disponibles</div><div class="track"><span style="width:${count*10}%"></span></div><div class="muted">${inCount} ya sentados/ingresados</div></div>`}).join('');
+ if(!tables.length)cards.innerHTML='<div class="muted">Las mesas aparecerán al registrar invitados.</div>';
+ populateTables(document.getElementById('editId').value?Number(document.getElementById('tableSelect').value):null,document.getElementById('editId').value||null);
+}
+document.getElementById('guestForm').addEventListener('submit',e=>{
+ e.preventDefault();let id=document.getElementById('editId').value,name=document.getElementById('guestName').value.trim(),folio=document.getElementById('folio').value.trim(),table=Number(document.getElementById('tableSelect').value);
+ if(!name||!folio)return;
+ if(guests.some(g=>g.folio.toLowerCase()===folio.toLowerCase()&&g.id!==id)){alert('Ese folio ya está registrado. Verifica el identificador VIP.');return}
+ if(used(table,id)>=10){alert('Esta mesa ya está completa. Selecciona otra mesa.');populateTables();return}
+ if(id){let g=guests.find(x=>x.id===id);if(g)Object.assign(g,{name,folio,table})}
+ else guests.push({id:crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random()),name,folio,table,inside:false,createdAt:new Date().toISOString()});
+ resetForm();persist();
+});
+function resetForm(){document.getElementById('guestForm').reset();document.getElementById('editId').value='';document.getElementById('formTitle').textContent='Registrar invitado VIP';document.getElementById('saveBtn').textContent='Guardar invitado';document.getElementById('cancelEdit').style.display='none';populateTables()}
+function toggleInside(id){let g=guests.find(x=>x.id===id);if(g){g.inside=!g.inside;g.insideAt=g.inside?new Date().toISOString():null;persist()}}
+function editGuest(id){let g=guests.find(x=>x.id===id);if(!g)return;document.getElementById('editId').value=id;document.getElementById('guestName').value=g.name;document.getElementById('folio').value=g.folio;populateTables(g.table,id);document.getElementById('formTitle').textContent='Editar invitado VIP';document.getElementById('saveBtn').textContent='Guardar cambios';document.getElementById('cancelEdit').style.display='block';document.getElementById('guestName').focus();window.scrollTo({top:0,behavior:'smooth'})}
+function askDelete(id){deleteTarget=id;document.getElementById('modal').style.display='flex'}
+document.getElementById('noDelete').onclick=()=>{deleteTarget=null;document.getElementById('modal').style.display='none'};
+document.getElementById('yesDelete').onclick=()=>{guests=guests.filter(g=>g.id!==deleteTarget);deleteTarget=null;document.getElementById('modal').style.display='none';persist()};
+document.getElementById('cancelEdit').onclick=resetForm;
+document.getElementById('search').addEventListener('input',render);document.getElementById('filter').addEventListener('change',render);
+document.getElementById('exportCsv').onclick=()=>{let data=[['Nombre completo','Folio','Mesa','Estado'],...guests.map(g=>[g.name,g.folio,g.table,g.inside?'Dentro':'Pendiente'])];let csv=data.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');let blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='registro_vip_flor_normalista_2026.csv';a.click();URL.revokeObjectURL(url)};
+populateTables();render();
+</script>
+</body></html>
