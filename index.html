@@ -131,7 +131,7 @@ function parseCSV(text){
   }else{
    if(c==='"')quoted=true;
    else if(c===','){row.push(field);field=''}
-   else if(c==='\\n'){row.push(field);rows.push(row);row=[];field=''}
+   else if(c==='\n'){row.push(field);rows.push(row);row=[];field=''}
    else if(c==='\\r'){/* ignorar retorno de carro */}
    else field+=c;
   }
@@ -140,13 +140,13 @@ function parseCSV(text){
  return rows.filter(r=>r.some(v=>String(v).trim()!==''));
 }
 function normalizeHeader(value){
- return String(value||'').trim().toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g,'');
+ return String(value||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 }
 document.getElementById('importCsvBtn').onclick=()=>document.getElementById('importCsvFile').click();
 document.getElementById('importCsvFile').addEventListener('change',async e=>{
  const file=e.target.files[0];if(!file)return;
  try{
-  const text=await file.text(),rows=parseCSV(text.replace(/^\\uFEFF/,''));
+  const text=await file.text(),rows=parseCSV(text.replace(/^\uFEFF/,''));
   if(rows.length<2)throw new Error('El archivo no contiene registros.');
   const headers=rows[0].map(normalizeHeader);
   const col={
