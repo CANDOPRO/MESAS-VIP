@@ -64,7 +64,7 @@ footer{text-align:center;color:#8a92a2;font-size:11px;padding:18px}
  </section>
  <section class="panel">
   <h2>Lista de invitados</h2>
-  <div class="toolbar"><input id="search" placeholder="Buscar por nombre o folio..."><select id="filter" style="max-width:165px"><option value="all">Todos</option><option value="pending">Pendientes</option><option value="inside">Ya ingresaron</option></select><button class="secondary" id="exportCsv">Exportar CSV</button><button class="ghost" onclick="window.print()">Imprimir</button></div>
+  <div class="toolbar"><input id="search" placeholder="Buscar por nombre o folio..."><select id="filter" style="max-width:165px"><option value="all">Todos</option><option value="pending">Pendientes</option><option value="inside">Ya ingresaron</option></select><button class="secondary" id="exportCsv">Exportar CSV</button><button class="secondary" type="button" id="importCsvBtn">Importar CSV</button><input type="file" id="importCsvFile" accept=".csv,text/csv" hidden><button class="ghost" onclick="window.print()">Imprimir</button></div>
   <div class="tablewrap"><table><thead><tr><th>Invitado</th><th>Folio</th><th>Mesa</th><th>Acceso</th><th>Acciones</th></tr></thead><tbody id="guestRows"></tbody></table><div class="empty" id="empty">Todavía no hay invitados registrados.</div></div>
  </section>
 </div>
@@ -118,6 +118,70 @@ document.getElementById('yesDelete').onclick=()=>{guests=guests.filter(g=>g.id!=
 document.getElementById('cancelEdit').onclick=resetForm;
 document.getElementById('search').addEventListener('input',render);document.getElementById('filter').addEventListener('change',render);
 document.getElementById('exportCsv').onclick=()=>{let data=[['Nombre completo','Folio','Mesa','Estado'],...guests.map(g=>[g.name,g.folio,g.table,g.inside?'Dentro':'Pendiente'])];let csv=data.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');let blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='registro_vip_flor_normalista_2026.csv';a.click();URL.revokeObjectURL(url)};
+
+// Importar registros desde un CSV exportado por este sistema.
+function parseCSV(text){
+ const rows=[];let row=[],field='',quoted=false;
+ for(let i=0;i<text.length;i++){
+  const c=text[i],next=text[i+1];
+  if(quoted){
+   if(c==='"'&&next==='"'){field+='"';i++}
+   else if(c==='"')quoted=false;
+   else field+=c;
+  }else{
+   if(c==='"')quoted=true;
+   else if(c===','){row.push(field);field=''}
+   else if(c==='\\n'){row.push(field);rows.push(row);row=[];field=''}
+   else if(c==='\\r'){/* ignorar retorno de carro */}
+   else field+=c;
+  }
+ }
+ if(field.length||row.length){row.push(field);rows.push(row)}
+ return rows.filter(r=>r.some(v=>String(v).trim()!==''));
+}
+function normalizeHeader(value){
+ return String(value||'').trim().toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g,'');
+}
+document.getElementById('importCsvBtn').onclick=()=>document.getElementById('importCsvFile').click();
+document.getElementById('importCsvFile').addEventListener('change',async e=>{
+ const file=e.target.files[0];if(!file)return;
+ try{
+  const text=await file.text(),rows=parseCSV(text.replace(/^\\uFEFF/,''));
+  if(rows.length<2)throw new Error('El archivo no contiene registros.');
+  const headers=rows[0].map(normalizeHeader);
+  const col={
+   name:headers.findIndex(h=>h==='nombre completo'||h==='nombre'),
+   folio:headers.findIndex(h=>h==='folio'||h==='folio del identificador vip'),
+   table:headers.findIndex(h=>h==='mesa'||h==='mesa asignada'),
+   status:headers.findIndex(h=>h==='estado'||h==='acceso')
+  };
+  if([col.name,col.folio,col.table].some(i=>i<0))throw new Error('No reconocí las columnas. Usa un CSV exportado desde este sistema.');
+  const imported=[],seen=new Set();
+  for(let i=1;i<rows.length;i++){
+   const r=rows[i],name=String(r[col.name]||'').trim(),folio=String(r[col.folio]||'').trim(),table=Number(String(r[col.table]||'').trim());
+   if(!name||!folio||!Number.isInteger(table)||table<1)throw new Error('Hay datos incompletos o una mesa inválida en la fila '+(i+1)+'.');
+   const key=folio.toLowerCase();
+   if(seen.has(key))throw new Error('El folio "'+folio+'" aparece más de una vez en el archivo.');
+   seen.add(key);
+   const status=col.status>=0?normalizeHeader(r[col.status]):'pendiente';
+   imported.push({name,folio,table,inside:status==='dentro'||status==='ingresado'||status==='ya ingreso'});
+  }
+  const next=guests.map(g=>({...g}));
+  for(const item of imported){
+   const existing=next.find(g=>g.folio.toLowerCase()===item.folio.toLowerCase());
+   if(existing)Object.assign(existing,item);
+   else next.push({...item,id:crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random()),createdAt:new Date().toISOString(),insideAt:item.inside?new Date().toISOString():null});
+  }
+  const counts={};
+  next.forEach(g=>counts[g.table]=(counts[g.table]||0)+1);
+  const full=Object.entries(counts).find(([table,count])=>count>10);
+  if(full)throw new Error('La Mesa '+full[0]+' quedaría con '+full[1]+' invitados. Cada mesa admite máximo 10.');
+  if(!confirm('Se importarán '+imported.length+' registros. Los folios que ya existan se actualizarán y los nuevos se agregarán. ¿Deseas continuar?'))return;
+  guests=next;persist();
+  alert('Importación completada. Se procesaron '+imported.length+' invitados.');
+ }catch(err){alert('No se pudo importar el CSV: '+err.message)}
+ finally{e.target.value=''}
+});
 populateTables();render();
 </script>
 </body></html>
